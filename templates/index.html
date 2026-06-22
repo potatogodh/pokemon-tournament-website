@@ -3,16 +3,58 @@
 <head>
     <title>Pokémon Tournament</title>
     <style>
-        body { font-family: Arial; text-align: center; }
-        img { width: 150px; }
-        button { padding: 10px 20px; margin: 10px; font-size: 18px; }
-    </style>
+    body { 
+        font-family: Arial; 
+        text-align: center; 
+        background: #f4f4f4;
+    }
+
+    .match-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    .card {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 15px;
+        width: 220px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: transform 0.2s;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .card img {
+        width: 150px;
+    }
+
+    .card button {
+        margin-top: 10px;
+        padding: 10px;
+        width: 100%;
+        font-size: 16px;
+        border-radius: 10px;
+        border: none;
+        background: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    .card button:hover {
+        background: #45a049;
+    }
+</style>
 </head>
 <body>
 
 <h1>Pokémon Tournament</h1>
 
-<div id="match"></div>
+<div id="match" class="match-container"></div>
 
 <script>
     let pokemon = {{ pokemon|tojson }};
@@ -33,13 +75,20 @@
 
         let p1 = pokemon[index];
         let p2 = pokemon[index + 1];
+        
+document.getElementById("match").innerHTML = `
+    <div class="card">
+        <h2>${p1}</h2>
+        <img src="${sprite(p1)}">
+        <button onclick="chooseWinner('${p1}')">Choose ${p1}</button>
+    </div>
 
-        document.getElementById("match").innerHTML = `
-            <h2>${p1} vs ${p2}</h2>
-            <img src="${sprite(p1)}">
-            <img src="${sprite(p2)}"><br>
-            <button onclick="chooseWinner('${p1}')">${p1}</button>
-            <button onclick="chooseWinner('${p2}')">${p2}</button>
+    <div class="card">
+        <h2>${p2}</h2>
+        <img src="${sprite(p2)}">
+        <button onclick="chooseWinner('${p2}')">Choose ${p2}</button>
+    </div>
+`;
         `;
     }
 
