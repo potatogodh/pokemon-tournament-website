@@ -1,7 +1,151 @@
-if (pokemon.length === 1) {
-    fetch("/save_winner", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ gen: {{ gen }}, winner: pokemon[0] })
-    });
-}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokémon Tournament</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: #fff;
+            margin: 0;
+        }
+
+        header {
+            background: #161b22;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .round-info {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .match-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 15px;
+            width: 260px;
+            border: 2px solid #4CAF50;
+            box-shadow: 0 0 15px rgba(76,175,80,0.4);
+        }
+
+        .card img {
+            width: 150px;
+        }
+
+        .name {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            text-align: left;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .stats div {
+            margin: 3px 0;
+        }
+
+        .card button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .card button:hover {
+            background: #45a049;
+        }
+
+        .bracket {
+            background: #161b22;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #4CAF50;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .round-block {
+            margin-bottom: 15px;
+        }
+
+        .round-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4CAF50;
+        }
+
+        .match-line {
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .champion {
+            margin-top: 20px;
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            color: #FFD700;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Pokémon Tournament</h1>
+    <div class="round-info" id="round-info"></div>
+</header>
+
+<div class="layout">
+    <div>
+        <div id="match" class="match-container"></div>
+        <div id="champion" class="champion"></div>
+    </div>
+
+    <div class="bracket">
+        <h2>Bracket</h2>
+        <div id="bracket-view"></div>
+    </div>
+</div>
+
+<script>
+    let pokemon = {{ pokemon|tojson }};
+    let currentRound = 1;
+    let matchesThisRound = [];
+    let bracketData = [];
+    let index = 0;
+
+    function
