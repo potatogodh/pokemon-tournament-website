@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokémon Tournament</title>
+    <style>
+        body { font-family: Arial; text-align: center; }
+        img { width: 150px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<h1>Pokémon Tournament</h1>
+
+<div id="match"></div>
+
+<script>
+    let pokemon = {{ pokemon|tojson }};
+    let index = 0;
+
+    function sprite(name) {
+        name = name.toLowerCase().replace(" ", "-").replace("'", "");
+        return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`;
+    }
+
+    function nextMatch() {
+        if (pokemon.length === 1) {
+            document.getElementById("match").innerHTML =
+                `<h2>Champion: ${pokemon[0]}</h2>
+                 <img src="${sprite(pokemon[0])}">`;
+            return;
+        }
+
+        let p1 = pokemon[index];
+        let p2 = pokemon[index + 1];
+
+        document.getElementById("match").innerHTML = `
+            <h2>${p1} vs ${p2}</h2>
+            <img src="${sprite(p1)}">
+            <img src="${sprite(p2)}"><br>
+            <button onclick="chooseWinner('${p1}')">${p1}</button>
+            <button onclick="chooseWinner('${p2}')">${p2}</button>
+        `;
+    }
+
+    function chooseWinner(winner) {
+        pokemon.splice(index, 2, winner);
+
+        if (index >= pokemon.length - 1) index = 0;
+        else index += 2;
+
+        nextMatch();
+    }
+
+    nextMatch();
+</script>
+
+</body>
+</html>
