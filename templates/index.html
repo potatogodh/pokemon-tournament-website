@@ -2,28 +2,35 @@
 <html>
 <head>
     <title>Pokémon Tournament</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #101820;
-            color: #f2f2f2;
+            background: url('https://wallpapercave.com/wp/wp2757874.gif');
+            background-size: cover;
+            background-attachment: fixed;
+            color: #fff;
             margin: 0;
-            padding: 0;
         }
 
         header {
-            background: #1f2933;
+            background: rgba(0,0,0,0.7);
             padding: 20px;
             text-align: center;
+            border-bottom: 3px solid #FFD700;
         }
 
         h1 {
             margin: 0;
+            font-size: 40px;
+            text-shadow: 0 0 10px #FFD700;
         }
 
         .round-info {
             margin-top: 10px;
-            font-size: 18px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #FFD700;
         }
 
         .layout {
@@ -41,16 +48,17 @@
         }
 
         .card {
-            background: #1f2933;
+            background: rgba(0,0,0,0.75);
             padding: 20px;
             border-radius: 15px;
             width: 260px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 2px solid #4CAF50;
+            box-shadow: 0 0 20px rgba(76,175,80,0.7);
             transition: transform 0.2s;
         }
 
         .card:hover {
-            transform: scale(1.03);
+            transform: scale(1.05);
         }
 
         .card img {
@@ -58,8 +66,9 @@
         }
 
         .name {
-            font-size: 20px;
+            font-size: 22px;
             margin-bottom: 10px;
+            text-shadow: 0 0 10px #4CAF50;
         }
 
         .stats {
@@ -69,7 +78,7 @@
         }
 
         .stats div {
-            margin: 2px 0;
+            margin: 3px 0;
         }
 
         .card button {
@@ -89,15 +98,12 @@
         }
 
         .bracket {
-            background: #1f2933;
+            background: rgba(0,0,0,0.75);
             padding: 15px;
             border-radius: 10px;
+            border: 2px solid #FFD700;
             max-height: 80vh;
             overflow-y: auto;
-        }
-
-        .bracket h2 {
-            margin-top: 0;
         }
 
         .round-block {
@@ -107,6 +113,7 @@
         .round-title {
             font-weight: bold;
             margin-bottom: 5px;
+            color: #FFD700;
         }
 
         .match-line {
@@ -116,12 +123,14 @@
 
         .champion {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 26px;
             font-weight: bold;
             text-align: center;
+            text-shadow: 0 0 10px #FFD700;
         }
     </style>
 </head>
+
 <body>
 
 <header>
@@ -130,13 +139,11 @@
 </header>
 
 <div class="layout">
-    <!-- Left: current match -->
     <div>
         <div id="match" class="match-container"></div>
         <div id="champion" class="champion"></div>
     </div>
 
-    <!-- Right: bracket view -->
     <div class="bracket">
         <h2>Bracket</h2>
         <div id="bracket-view"></div>
@@ -144,31 +151,59 @@
 </div>
 
 <script>
-    // Initial data from Flask
     let pokemon = {{ pokemon|tojson }};
     let currentRound = 1;
     let matchesThisRound = [];
-    let bracketData = []; // [{round: 1, matches: [{p1, p2, winner}]}]
+    let bracketData = [];
     let index = 0;
 
+    // FIXED SPRITE LOADER
     function sprite(name) {
-        name = name.toLowerCase()
-                    .replace(" ", "-")
-                    .replace("'", "")
-                    .replace(".", "")
-                    .replace(":", "");
-        return `https://play.pokemonshowdown.com/sprites/gen5/${name}.png`;
+        let n = name.toLowerCase();
+
+        n = n.replace(/[:.'’]/g, "");
+        n = n.replace(/[\s-]/g, "");
+
+        const fixes = {
+            "mr mime": "mrmime",
+            "mr rime": "mrrime",
+            "mime jr": "mimejr",
+            "type null": "typenull",
+            "jangmo o": "jangmoo",
+            "hakamo o": "hakamoo",
+            "kommo o": "kommoo",
+            "tapu koko": "tapukoko",
+            "tapu lele": "tapulele",
+            "tapu bulu": "tapubulu",
+            "tapu fini": "tapufini",
+            "wo chien": "wochien",
+            "chien pao": "chienpao",
+            "ting lu": "tinglu",
+            "chi yu": "chiyu",
+            "great tusk": "greattusk",
+            "iron bundle": "ironbundle",
+            "iron hands": "ironhands",
+            "iron jugulis": "ironjugulis",
+            "iron moth": "ironmoth",
+            "iron thorns": "ironthorns",
+            "iron valiant": "ironvaliant",
+            "walking wake": "walkingwake",
+            "iron leaves": "ironleaves"
+        };
+
+        if (fixes[n]) n = fixes[n];
+
+        return `https://play.pokemonshowdown.com/sprites/gen5/${n}.png`;
     }
 
-    // Simple fake stats generator (so you always have info)
+    // Fake stats (consistent)
     function getStats(name) {
-        // Deterministic pseudo-stats based on name length
         const base = name.length * 7;
         return {
-            hp: 50 + (base % 51),       // 50–100
-            attack: 50 + (base % 61),   // 50–110
-            defense: 40 + (base % 51),  // 40–90
-            speed: 40 + (base % 61)     // 40–100
+            hp: 50 + (base % 51),
+            attack: 50 + (base % 61),
+            defense: 40 + (base % 51),
+            speed: 40 + (base % 61)
         };
     }
 
@@ -185,124 +220,4 @@
             const roundDiv = document.createElement("div");
             roundDiv.className = "round-block";
 
-            const title = document.createElement("div");
-            title.className = "round-title";
-            title.innerText = `Round ${round.round}`;
-            roundDiv.appendChild(title);
-
-            round.matches.forEach(m => {
-                const line = document.createElement("div");
-                line.className = "match-line";
-                if (m.winner) {
-                    line.innerText = `${m.p1} vs ${m.p2} → Winner: ${m.winner}`;
-                } else {
-                    line.innerText = `${m.p1} vs ${m.p2}`;
-                }
-                roundDiv.appendChild(line);
-            });
-
-            container.appendChild(roundDiv);
-        });
-    }
-
-    function setupRound() {
-        matchesThisRound = [];
-        for (let i = 0; i < pokemon.length; i += 2) {
-            if (i + 1 < pokemon.length) {
-                matchesThisRound.push({ p1: pokemon[i], p2: pokemon[i + 1], winner: null });
-            } else {
-                // Bye
-                matchesThisRound.push({ p1: pokemon[i], p2: null, winner: pokemon[i] });
-            }
-        }
-        bracketData.push({ round: currentRound, matches: JSON.parse(JSON.stringify(matchesThisRound)) });
-        index = 0;
-        updateRoundInfo();
-        renderBracket();
-        nextMatch();
-    }
-
-    function nextMatch() {
-        const matchDiv = document.getElementById("match");
-        const championDiv = document.getElementById("champion");
-
-        if (pokemon.length === 1) {
-            matchDiv.innerHTML = "";
-            championDiv.innerHTML = `🏆 Champion: ${pokemon[0]}`;
-            return;
-        }
-
-        championDiv.innerHTML = "";
-
-        // Find next match that doesn't have a decided winner
-        while (index < matchesThisRound.length && matchesThisRound[index].winner !== null) {
-            index++;
-        }
-
-        if (index >= matchesThisRound.length) {
-            // Round finished → prepare next round
-            const winners = matchesThisRound.map(m => m.winner).filter(w => w !== null);
-            pokemon = winners;
-            currentRound++;
-            setupRound();
-            return;
-        }
-
-        const match = matchesThisRound[index];
-        const p1 = match.p1;
-        const p2 = match.p2;
-
-        if (!p2) {
-            // Bye
-            match.winner = p1;
-            bracketData[bracketData.length - 1].matches[index].winner = p1;
-            renderBracket();
-            index++;
-            nextMatch();
-            return;
-        }
-
-        const stats1 = getStats(p1);
-        const stats2 = getStats(p2);
-
-        matchDiv.innerHTML = `
-            <div class="card">
-                <div class="name">${p1}</div>
-                <img src="${sprite(p1)}" alt="${p1}">
-                <div class="stats">
-                    <div><strong>HP:</strong> ${stats1.hp}</div>
-                    <div><strong>Attack:</strong> ${stats1.attack}</div>
-                    <div><strong>Defense:</strong> ${stats1.defense}</div>
-                    <div><strong>Speed:</strong> ${stats1.speed}</div>
-                </div>
-                <button onclick="chooseWinner('${p1}')">Choose ${p1}</button>
-            </div>
-
-            <div class="card">
-                <div class="name">${p2}</div>
-                <img src="${sprite(p2)}" alt="${p2}">
-                <div class="stats">
-                    <div><strong>HP:</strong> ${stats2.hp}</div>
-                    <div><strong>Attack:</strong> ${stats2.attack}</div>
-                    <div><strong>Defense:</strong> ${stats2.defense}</div>
-                    <div><strong>Speed:</strong> ${stats2.speed}</div>
-                </div>
-                <button onclick="chooseWinner('${p2}')">Choose ${p2}</button>
-            </div>
-        `;
-    }
-
-    function chooseWinner(winner) {
-        matchesThisRound[index].winner = winner;
-        bracketData[bracketData.length - 1].matches[index].winner = winner;
-        renderBracket();
-        index++;
-        nextMatch();
-    }
-
-    // Start
-    setupRound();
-</script>
-
-</body>
-</html>
+            const title = document
