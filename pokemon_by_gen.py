@@ -134,4 +134,15 @@ pokemon_by_gen = {
         "nacli","naclstack","garganacl","charcadet","armarouge","ceruledge","tadbulb","bellibolt",
         "wattrel","kilowattrel","maschiff","mabosstiff","shroodle","grafaiai","bramblin","brambleghast",
         "toedscool","toedscruel","klawf","capsakid","scovillain","rellor","rabsca","flittle","espathra",
-        "tinkatink","tinkatuff","tinkaton","wiglett","wugtrio","bombirdier","finizen","
+        "tinkatink","tinkatuff","tinkaton","wiglett","wugtrio","bombirdier","finizen","palafin","varoom","revavroom","cyclizar","orthworm","glimmet",
+"glimmora","greavard","houndstone","flamigo","cetoddle","cetitan","veluza",
+"dondozo","tatsugiri","annihilape","clodsire","farigiraf","dudunsparce",
+"kingambit","great tusk","scream tail","brute bonnet","flutter mane",
+"slither wing","sandy shocks","iron treads","iron bundle","iron hands",
+"iron jugulis","iron moth","iron thorns","frigibax","arctibax","baxcalibur",
+"gimmighoul","gholdengo","wo-chien","chien-pao","ting-lu","chi-yu",
+"roaring moon","iron valiant","koraidon","miraidon","walking wake",
+"iron leaves","dipplin","poltchageist","sinistcha","okidogi","munkidori",
+"fezandipiti","ogerpon","archaludon","hydrapple","gouging fire",
+"raging bolt","iron boulder","iron crown","terapagos","pecharunt"
+    ]
