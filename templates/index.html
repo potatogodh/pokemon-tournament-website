@@ -148,4 +148,187 @@
     let bracketData = [];
     let index = 0;
 
-    function
+    function sprite(name) {
+        let n = name.toLowerCase();
+        n = n.replace(/[:.'’]/g, "");
+        n = n.replace(/[\s-]/g, "");
+
+        const fixes = {
+            "mr mime": "mrmime",
+            "mr rime": "mrrime",
+            "mime jr": "mimejr",
+            "type null": "typenull",
+            "jangmo o": "jangmoo",
+            "hakamo o": "hakamoo",
+            "kommo o": "kommoo",
+            "tapu koko": "tapukoko",
+            "tapu lele": "tapulele",
+            "tapu bulu": "tapubulu",
+            "tapu fini": "tapufini",
+            "wo chien": "wochien",
+            "chien pao": "chienpao",
+            "ting lu": "tinglu",
+            "chi yu": "chiyu",
+            "great tusk": "greattusk",
+            "iron bundle": "ironbundle",
+            "iron hands": "ironhands",
+            "iron jugulis": "ironjugulis",
+            "iron moth": "ironmoth",
+            "iron thorns": "ironthorns",
+            "iron valiant": "ironvaliant",
+            "walking wake": "walkingwake",
+            "iron leaves": "ironleaves"
+        };
+
+        if (fixes[n]) n = fixes[n];
+
+        return `https://play.pokemonshowdown.com/sprites/gen5/${n}.png`;
+    }
+
+    function getStats(name) {
+        const base = name.length * 7;
+        return {
+            hp: 50 + (base % 51),
+            attack: 50 + (base % 61),
+            defense: 40 + (base % 51),
+            speed: 40 + (base % 61)
+        };
+    }
+
+    function updateRoundInfo() {
+        document.getElementById("round-info").innerText =
+            `Round ${currentRound} — ${pokemon.length} Pokémon remaining`;
+    }
+
+    function renderBracket() {
+        const container = document.getElementById("bracket-view");
+        container.innerHTML = "";
+
+        bracketData.forEach(round => {
+            const roundDiv = document.createElement("div");
+            roundDiv.className = "round-block";
+
+            const title = document.createElement("div");
+            title.className = "round-title";
+            title.innerText = `Round ${round.round}`;
+            roundDiv.appendChild(title);
+
+            round.matches.forEach(m => {
+                const line = document.createElement("div");
+                line.className = "match-line";
+                if (m.winner) {
+                    line.innerText = `${m.p1} vs ${m.p2} → Winner: ${m.winner}`;
+                } else {
+                    line.innerText = `${m.p1} vs ${m.p2}`;
+                }
+                roundDiv.appendChild(line);
+            });
+
+            container.appendChild(roundDiv);
+        });
+    }
+
+    function setupRound() {
+        matchesThisRound = [];
+        for (let i = 0; i < pokemon.length; i += 2) {
+            if (i + 1 < pokemon.length) {
+                matchesThisRound.push({ p1: pokemon[i], p2: pokemon[i + 1], winner: null });
+            } else {
+                matchesThisRound.push({ p1: pokemon[i], p2: null, winner: pokemon[i] });
+            }
+        }
+        bracketData.push({ round: currentRound, matches: JSON.parse(JSON.stringify(matchesThisRound)) });
+        index = 0;
+        updateRoundInfo();
+        renderBracket();
+        nextMatch();
+    }
+
+    function nextMatch() {
+        const matchDiv = document.getElementById("match");
+        const championDiv = document.getElementById("champion");
+
+        if (pokemon.length === 1) {
+
+            // ⭐ THIS IS WHERE YOUR SAVE-WINNER CODE GOES
+            fetch("/save_winner", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ gen: {{ gen }}, winner: pokemon[0] })
+            });
+
+            matchDiv.innerHTML = "";
+            championDiv.innerHTML = `🏆 Champion: ${pokemon[0]}`;
+            return;
+        }
+
+        championDiv.innerHTML = "";
+
+        while (index < matchesThisRound.length && matchesThisRound[index].winner !== null) {
+            index++;
+        }
+
+        if (index >= matchesThisRound.length) {
+            const winners = matchesThisRound.map(m => m.winner).filter(w => w !== null);
+            pokemon = winners;
+            currentRound++;
+            setupRound();
+            return;
+        }
+
+        const match = matchesThisRound[index];
+        const p1 = match.p1;
+        const p2 = match.p2;
+
+        if (!p2) {
+            match.winner = p1;
+            bracketData[bracketData.length - 1].matches[index].winner = p1;
+            renderBracket();
+            index++;
+            nextMatch();
+            return;
+        }
+
+        const stats1 = getStats(p1);
+        const stats2 = getStats(p2);
+
+        matchDiv.innerHTML = `
+            <div class="card">
+                <div class="name">${p1}</div>
+                <img src="${sprite(p1)}">
+                <div class="stats">
+                    <div><strong>HP:</strong> ${stats1.hp}</div>
+                    <div><strong>Attack:</strong> ${stats1.attack}</div>
+                    <div><strong>Defense:</strong> ${stats1.defense}</div>
+                    <div><strong>Speed:</strong> ${stats1.speed}</div>
+                </div>
+                <button onclick="chooseWinner('${p1}')">Choose ${p1}</button>
+            </div>
+
+            <div class="card">
+                <div class="name">${p2}</div>
+                <img src="${sprite(p2)}">
+                <div class="stats">
+                    <div><strong>HP:</strong> ${stats2.hp}</div>
+                    <div><strong>Attack:</strong> ${stats2.attack}</div>
+                    <div><strong>Defense:</strong> ${stats2.defense}</div>
+                    <div><strong>Speed:</strong> ${stats2.speed}</div>
+                </div>
+                <button onclick="chooseWinner('${p2}')">Choose ${p2}</button>
+            </div>
+        `;
+    }
+
+    function chooseWinner(winner) {
+        matchesThisRound[index].winner = winner;
+        bracketData[bracketData.length - 1].matches[index].winner = winner;
+        renderBracket();
+        index++;
+        nextMatch();
+    }
+
+    setupRound();
+</script>
+
+</body>
+</html>
